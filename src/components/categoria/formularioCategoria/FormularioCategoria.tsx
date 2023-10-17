@@ -2,29 +2,42 @@ import { BaseSyntheticEvent, ChangeEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Categoria from "../../../model/Categoria";
 import { buscar, cadastrar, atualizar} from "../../../service/Service";
+import { toastAlerta } from "../../../util/toastAlerta";
+import { categorias } from "../../../database/categoriaDB";
+
 
 export default function FormularioCategoria() {
   const navigate = useNavigate();
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
   
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+
   const [categoria, setCategoria] = useState<Categoria>({
     id: 0,
     prescricao: "",
     tipo: "",
   });
-  const [loading, setLoading] = useState<boolean>();
+  const [loading, setLoading] = useState(false);
+  
 
   const { id } = useParams<{ id: string }>();
 
+  async function buscarPorId(id: string) {
+    await buscar(`/categoria/${id}`, setCategoria, {
+      headers: {
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20uYnIiLCJpYXQiOjE2OTQ1NTM4ODUsImV4cCI6MTY5NDU1NzQ4NX0.IjfWGssneXizQOGEpTG43YH8oVHC3UM6-vydSwRIXHY",
+      },
+    });
+  }
+
   useEffect(() => {
     if (id !== undefined) {
-      setLoading(true);
+
       buscarPorId(id);
     }
   }, [id]);
 
   useEffect(()=>{
-    const categoria = categorias.find((x)=>x.id == id);
+    const categoria = categorias.find((x)=>x.id == +id);
     if (categoria) {
       setCategoria(categoria);
     }
@@ -32,7 +45,7 @@ export default function FormularioCategoria() {
 
   function handleChangePrescricao(value: string) {
     setCategoria((categoria) => {
-      return { prescricao: value, id: categoria.id };
+      return { prescricao: value, id: categorias.id };
     });
   }
 
@@ -57,51 +70,63 @@ export default function FormularioCategoria() {
     e.preventDefault();
 
     if (id !== undefined) {
-      await atualizarCategoria();
-    } else {
-      await cadastrarCategoria();
+        try {
+          await atualizar(`/categoria`, categorias, setCategorias, {
+            headers: {
+              'Authorization': "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20uYnIiLCJpYXQiOjE2OTQ1NTM4ODUsImV4cCI6MTY5NDU1NzQ4NX0.IjfWGssneXizQOGEpTG43YH8oVHC3UM6-vydSwRIXHY"
+            }
+          })
+  
+          toastAlerta('Categoria atualizado com sucesso', 'sucesso')
+          retornar()
+  
+        } catch (error: any) {
+          if (error.toString().includes('403')) {
+            toastAlerta('O token expirou, favor logar novamente', 'info')
+          } else {
+            toastAlerta('Erro ao atualizar a Categoria', 'erro')
+          }
+  
+        }
+  
+      } else {
+        try {
+          await cadastrar(`/categoria`, categorias, setCategorias, {
+            headers: {
+              'Authorization': "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20uYnIiLCJpYXQiOjE2OTQ1NTM4ODUsImV4cCI6MTY5NDU1NzQ4NX0.IjfWGssneXizQOGEpTG43YH8oVHC3UM6-vydSwRIXHY"
+            }
+          })
+  
+          toastAlerta('Categoria cadastrado com sucesso', 'sucesso')
+  
+        } catch (error: any) {
+          if (error.toString().includes('403')) {
+            toastAlerta('O token expirou, favor logar novamente', 'info')
+        
+          } else {
+            toastAlerta('Erro ao cadastrado a Categoria', 'erro')
+          }
+        }
+      }
+  
+      retornar()
     }
-  }
-
-  async function atualizarCategoria() {
-    await atualizar("/categorias", categoria, setCategorias, {
-      headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20uYnIiLCJpYXQiOjE2OTQ1NTM4ODUsImV4cCI6MTY5NDU1NzQ4NX0.IjfWGssneXizQOGEpTG43YH8oVHC3UM6-vydSwRIXHY",
-      },
-    });
-    alert("Categoria Atualizada com Sucesso!");
-    retornar();
-  }
-
-  async function cadastrarCategoria() {
-    await cadastrar("/categorias", categoria, setCategorias, {
-      headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20uYnIiLCJpYXQiOjE2OTQ1NTM4ODUsImV4cCI6MTY5NDU1NzQ4NX0.IjfWGssneXizQOGEpTG43YH8oVHC3UM6-vydSwRIXHY",
-      },
-    });
-    alert("Categoria Cadastrada com Sucesso!");
-    retornar();
-  }
 
   function retornar() {
     navigate("/categoria");
   }
 
-  if (loading) {
-    return <h1>Carregando....</h1>;
-  }
+
 
   return (
     <div className="container flex flex-col items-center justify-center mx-auto">
       <h1 className="text-4xl text-center my-8">
-        {id === undefined ? "Cadastre uma nova categoria" : "Editar categoria"}
+        {id === undefined ? "Cadastrar categoria" : "Editar categoria"}
       </h1>
 
       <form className="w-1/2 flex flex-col gap-4" onSubmit={gravarCategoria}>
         <div className="flex flex-col gap-2">
-          <label htmlFor="prescricao">Categoria</label>
+          <label htmlFor="prescricao">Prescrição</label>
           <input
             type="text"
             placeholder="Prescrição"

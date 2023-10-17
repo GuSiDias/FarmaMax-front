@@ -9,7 +9,7 @@ function Navbar() {
     return (
         <div className='w-full bg-indigo-900 text-white flex justify-center py-3'>
           <div className="container flex items-center justify-between text-lg me-8 ">
-            <div className=''> <img src={logo} alt='' className='w-3/4 '/> </div>
+            <Link to="/home" className=''> <img src={logo} alt='' className='w-3/4 '/> </Link>
 
             <div className='flex px-2.5'>
               <label className="relative block w-96">
@@ -18,8 +18,8 @@ function Navbar() {
             </div>
 
             <div className='flex  gap-4'>
-              <div  className='hover:underline'>Categorias</div>
-              <div  className='hover:underline'>Cadastrar categoria</div>
+              <Link to="/categoria" className='hover:underline'>Categorias</Link>
+              <Link to="/cadastraCategoria" className='hover:underline'>Cadastrar categoria</Link>
               <div  className='hover:underline'><img src={user} alt='' className='w-3/4'/></div>
               <div  className='hover:underline'><img src={car} alt='' className='w-3/4'/></div>
             </div>

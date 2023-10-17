@@ -3,6 +3,8 @@ import Categoria from "../../../model/Categoria";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { buscar, deletar } from "../../../service/Service";
+import { toastAlerta } from "../../../util/toastAlerta";
+
 
 export default function DeletarCategoria() {
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ export default function DeletarCategoria() {
             "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20uYnIiLCJpYXQiOjE2OTQ1NTM4ODUsImV4cCI6MTY5NDU1NzQ4NX0.IjfWGssneXizQOGEpTG43YH8oVHC3UM6-vydSwRIXHY",
         },
       });
-      alert("Categoria Removida com Sucesso!");
+      toastAlerta("Categoria Removida!",'sucesso');
       retornar();
     }
   }
